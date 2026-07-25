@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopee Listing Compliance Checker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1c1e1b;
+    --ink-soft:#4a4d47;
+    --paper:#f6f5f0;
+    --paper-raised:#ffffff;
+    --line:#ddd9cd;
+    --gold:#a97a2f;
+    --gold-soft:#f1e4cc;
+    --block:#a3352b;
+    --block-soft:#f6e3e0;
+    --caution:#b8781c;
+    --caution-soft:#f7ecd8;
+    --clear:#3f7a56;
+    --clear-soft:#e2eee5;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:36px 24px 80px;}
+
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    border-bottom:2px solid var(--ink);
+    padding-bottom:18px;
+    margin-bottom:28px;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .brand-eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin-bottom:6px;
+  }
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:32px;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  .subtitle{
+    font-size:13px;
+    color:var(--ink-soft);
+    max-width:340px;
+    text-align:right;
+    line-height:1.5;
+  }
+
+  .panel{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:24px;
+    margin-bottom:20px;
+  }
+  label{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  textarea, input[type=text]{
+    width:100%;
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    border:1px solid var(--line);
+    border-radius:7px;
+    padding:12px 13px;
+    resize:vertical;
+    color:var(--ink);
+    background:var(--paper);
+  }
+  textarea:focus, input[type=text]:focus{outline:2px solid var(--gold);outline-offset:1px;}
+  .field{margin-bottom:16px;}
+
+  button.primary{
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    background:var(--ink);
+    color:var(--paper);
+    border:none;
+    padding:12px 22px;
+    border-radius:7px;
+    cursor:pointer;
+    margin-top:4px;
+  }
+  button.primary:hover{background:#000;}
+  button.primary:disabled{background:var(--ink-soft);cursor:default;}
+
+  .scan-doc{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:14px;
+    line-height:2.1;
+    padding:16px;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:8px;
+    white-space:pre-wrap;
+    word-break:break-word;
+  }
+  mark{
+    background:transparent;
+    padding:1px 2px;
+    border-radius:3px;
+    font-weight:600;
+  }
+  mark.block{background:var(--block-soft);color:var(--block);text-decoration:underline wavy var(--block);text-decoration-thickness:1.5px;}
+  mark.caution{background:var(--caution-soft);color:var(--caution);text-decoration:underline wavy var(--caution);text-decoration-thickness:1.5px;}
+
+  .summary-empty{
+    font-size:13.5px;
+    color:var(--ink-soft);
+    font-style:italic;
+  }
+  .flag-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 12px;
+    border-radius:7px;
+    margin-bottom:6px;
+    font-size:13.5px;
+  }
+  .flag-item.block{background:var(--block-soft);}
+  .flag-item.caution{background:var(--caution-soft);}
+  .tag{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    padding:3px 7px;
+    border-radius:4px;
+    color:#fff;
+    flex-shrink:0;
+  }
+  .tag.block{background:var(--block);}
+  .tag.caution{background:var(--caution);}
+  .flag-term{font-family:'IBM Plex Mono',monospace;font-weight:600;flex-shrink:0;}
+  .flag-note{color:var(--ink-soft);flex:1;}
+
+  .clear-banner{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--clear-soft);
+    color:var(--clear);
+    padding:12px 14px;
+    border-radius:7px;
+    font-size:13.5px;
+    font-weight:600;
+  }
+  .error-banner{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--block-soft);
+    color:var(--block);
+    padding:12px 14px;
+    border-radius:7px;
+    font-size:13.5px;
+    font-weight:600;
+  }
+
+  .note{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    line-height:1.6;
+    background:var(--gold-soft);
+    border-left:3px solid var(--gold);
+    padding:12px 14px;
+    border-radius:0 6px 6px 0;
+    margin-top:22px;
+  }
+  .status-line{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-soft);margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="brand-eyebrow">Shopee Philippines · Seller Compliance</div>
+      <h1>Listing Scan</h1>
+    </div>
+    <div class="subtitle">Checks titles &amp; descriptions against wording Shopee has flagged or delisted listings for — built from real seller delisting cases.</div>
+  </header>
+
+  <div class="panel">
+    <div class="field">
+      <label for="titleInput">Listing Title</label>
+      <input type="text" id="titleInput" placeholder="e.g. Herbal Wellness Capsule for Men, 60s">
+    </div>
+    <div class="field">
+      <label for="descInput">Listing Description</label>
+      <textarea id="descInput" rows="7" placeholder="Paste the full description here..."></textarea>
+    </div>
+    <button class="primary" id="scanBtn" onclick="runScan()">Scan Listing</button>
+    <div class="status-line" id="scanStatus"></div>
+  </div>
+
+  <div class="panel" id="resultsPanel" style="display:none;">
+    <label>Scanned Text</label>
+    <div class="scan-doc" id="scanDoc"></div>
+
+    <div style="margin-top:20px;">
+      <label>Flags</label>
+      <div id="flagList"></div>
+    </div>
+  </div>
+
+  <div class="note">This is a first-pass filter, not a legal or regulatory clearance. A clean scan doesn't guarantee Shopee approval — always FDA-check therapeutic claims before publishing.</div>
+
+</div>
+
+<script>
+// Google Apps Script backend — reads the private word list, checker never sees the raw terms
+const CHECK_ENDPOINT = 'https://script.google.com/macros/s/AKfycbypqdYmyt37YmxXjzuHZ2Zdf5lqCJSSmJ1ot9zTDJ4vs36gxmT-UFWXDr_1YSa_6CD0cg/exec';
+
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+async function runScan(){
+  const title = document.getElementById('titleInput').value;
+  const desc = document.getElementById('descInput').value;
+  const fullText = (title ? title + '\n\n' : '') + desc;
+  const statusEl = document.getElementById('scanStatus');
+  const btn = document.getElementById('scanBtn');
+  const resultsPanel = document.getElementById('resultsPanel');
+  const flagListEl = document.getElementById('flagList');
+
+  if(!fullText.trim()){
+    statusEl.textContent = 'Paste a title or description first.';
+    return;
+  }
+
+  statusEl.textContent = 'Scanning…';
+  btn.disabled = true;
+
+  try{
+    const res = await fetch(CHECK_ENDPOINT, {
+      method: 'POST',
+      body: JSON.stringify({ title, description: desc })
+    });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+
+    const matches = data.matches || [];
+
+    // build highlighted text
+    let html = '';
+    let cursor = 0;
+    matches.forEach(m=>{
+      html += escapeHtml(fullText.slice(cursor, m.index));
+      html += `<mark class="${m.tier}">${escapeHtml(fullText.slice(m.index, m.index+m.length))}</mark>`;
+      cursor = m.index + m.length;
+    });
+    html += escapeHtml(fullText.slice(cursor));
+    document.getElementById('scanDoc').innerHTML = html || '<span style="color:var(--ink-soft)">(empty)</span>';
+
+    flagListEl.innerHTML = '';
+    if(matches.length === 0){
+      flagListEl.innerHTML = `<div class="clear-banner">✓ No flagged terms found.</div>`;
+    } else {
+      const blockCount = data.counts?.block ?? matches.filter(m=>m.tier==='block').length;
+      const cautionCount = data.counts?.caution ?? matches.filter(m=>m.tier==='caution').length;
+      const summary = document.createElement('div');
+      summary.className = 'summary-empty';
+      summary.style.marginBottom = '12px';
+      summary.textContent = `${blockCount} hard-block term${blockCount!==1?'s':''}, ${cautionCount} caution term${cautionCount!==1?'s':''} found.`;
+      flagListEl.appendChild(summary);
+
+      matches.forEach(m=>{
+        const item = document.createElement('div');
+        item.className = 'flag-item ' + m.tier;
+        item.innerHTML = `
+          <span class="tag ${m.tier}">${m.tier === 'block' ? 'Hard block' : 'Caution'}</span>
+          <span class="flag-term">"${escapeHtml(m.term)}"</span>
+          <span class="flag-note">${m.tier === 'block' ? 'Remove entirely — treated as a drug/medical claim.' : 'Consider rewording — has drawn Shopee scrutiny before.'}</span>
+        `;
+        flagListEl.appendChild(item);
+      });
+    }
+
+    resultsPanel.style.display = 'block';
+    statusEl.textContent = '';
+  }catch(e){
+    console.error('Scan failed', e);
+    flagListEl.innerHTML = `<div class="error-banner">Couldn't reach the checker service. Try again in a moment.</div>`;
+    document.getElementById('scanDoc').textContent = fullText;
+    resultsPanel.style.display = 'block';
+    statusEl.textContent = '';
+  }finally{
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
